@@ -84,7 +84,7 @@ def build_gif(pattern='@2x', gif_name='pretrain_apn_cub200', cache_path='build/.
     files.sort(key=lambda x: int(x.split('@')[0].split('_')[-1]))
     gif_images = [imageio.imread(f'{cache_path}/{img_file}') for img_file in files]
     imageio.mimsave(f"build/{gif_name}{pattern}-{int(time.time())}.gif", gif_images, fps=8)
-
+#-----
 
 def clean(path='build/.cache/'):
     print(' :: Cleaning cache dir ...')
