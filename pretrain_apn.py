@@ -50,7 +50,7 @@ def run(pretrained_backbone=None):
     optimizer = optim.SGD(params, lr=0.001, momentum=0.9)
 
     trainset = CUB200_loader('./data/images')
-    testset = CUB200_loader('./data/images')
+    testset = CUB200_loader('./data/test')
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, collate_fn=trainset.CUB_collate, num_workers=4)
     testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, collate_fn=testset.CUB_collate, num_workers=4)
     sample = random_sample(testloader)
