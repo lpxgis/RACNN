@@ -10,7 +10,8 @@ import torchvision.transforms as transforms
 
 class CUB200_loader(data.Dataset):
     def __init__(self, root):
-
+        std = 1. / 255.
+        means = [109.97 / 255., 127.34 / 255., 123.88 / 255.]
         self.transform=None
         self._imgpath = []
         self._imglabel = []
@@ -31,7 +32,9 @@ class CUB200_loader(data.Dataset):
                 transforms.RandomRotation(45),
                 transforms.CenterCrop(448),
                 transforms.ToTensor(),
-                transform.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))
+                transforms.Normalize(
+                    mean=means,
+                    std=[std]*3)
                 ])
 
 
