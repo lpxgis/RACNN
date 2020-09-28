@@ -46,7 +46,7 @@ def test(net, dataloader):
             outputs, _, _, _ = net(inputs)
             for idx, logits in enumerate(outputs):
                 correct_summary[f'clsf-{idx}']['top-1'] += torch.eq(logits.topk(max((1, 1)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()  # top-1
-            if step > 200:
+            if step > 10:
                 for clsf in correct_summary.keys():
                     _summary = correct_summary[clsf]
                     for topk in _summary.keys():
@@ -56,7 +56,7 @@ def test(net, dataloader):
 
 def run(pretrained_model):
     log(f' :: Start training with {pretrained_model}')
-    net = RACNN(num_classes=200).cuda()
+    net = RACNN(num_classes=2).cuda()
     net.load_state_dict(torch.load(pretrained_model))
     cudnn.benchmark = True
 

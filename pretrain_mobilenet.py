@@ -36,7 +36,7 @@ def eval(net, dataloader):
             correct_top3 += torch.eq(logits.topk(max((1, 3)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()
             correct_top5 += torch.eq(logits.topk(max((1, 5)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()
 
-        if step > 200:
+        if step > 20:
             log(f'\tAccuracy@top1 ({step}/{len(dataloader)}) = {correct_top1/((step+1)*int(inputs.shape[0])):.5%}')
             log(f'\tAccuracy@top3 ({step}/{len(dataloader)}) = {correct_top3/((step+1)*int(inputs.shape[0])):.5%}')
             log(f'\tAccuracy@top5 ({step}/{len(dataloader)}) = {correct_top5/((step+1)*int(inputs.shape[0])):.5%}')
@@ -47,7 +47,7 @@ def run():
     state_dict = torchvision.models.mobilenet.mobilenet_v2(pretrained=True).state_dict()
     state_dict.pop('classifier.1.weight')
     state_dict.pop('classifier.1.bias')
-    net = torchvision.models.mobilenet.mobilenet_v2(num_classes=200).cuda()
+    net = torchvision.models.mobilenet.mobilenet_v2(num_classes=2).cuda()
     state_dict['classifier.1.weight'] = net.state_dict()['classifier.1.weight']
     state_dict['classifier.1.bias'] = net.state_dict()['classifier.1.bias']
     net.load_state_dict(state_dict)
