@@ -46,8 +46,6 @@ def test(net, dataloader):
             outputs, _, _, _ = net(inputs)
             for idx, logits in enumerate(outputs):
                 correct_summary[f'clsf-{idx}']['top-1'] += torch.eq(logits.topk(max((1, 1)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()  # top-1
-                correct_summary[f'clsf-{idx}']['top-5'] += torch.eq(logits.topk(max((1, 5)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()  # top-5
-
             if step > 200:
                 for clsf in correct_summary.keys():
                     _summary = correct_summary[clsf]
