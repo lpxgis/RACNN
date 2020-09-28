@@ -38,7 +38,7 @@ def train(net, dataloader, optimizer, epoch, _type):
 
 def test(net, dataloader):
     log(' :: Testing on test set ...')
-    correct_summary = {'clsf-0': {'top-1': 0, 'top-5': 0}, 'clsf-1': {'top-1': 0, 'top-5': 0}, 'clsf-2': {'top-1': 0, 'top-5': 0}}
+    correct_summary = {'clsf-0': {'top-1': 0}, 'clsf-1': {'top-1': 0}, 'clsf-2': {'top-1': 0}}
     for step, (inputs, labels) in enumerate(dataloader, 0):
         inputs, labels = Variable(inputs).cuda(), Variable(labels).cuda()
 
