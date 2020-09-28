@@ -212,7 +212,7 @@ class RACNN(nn.Module):
 
 
 if __name__ == "__main__":
-    net = RACNN(num_classes=8).cuda()
+    net = RACNN(num_classes=2).cuda()
     net.mode('pretrain_apn')
     optimizer = torch.optim.SGD(list(net.apn1.parameters()) + list(net.apn2.parameters()), lr=0.001, momentum=0.9)
     for i in range(50):
