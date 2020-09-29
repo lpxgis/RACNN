@@ -36,8 +36,8 @@ def save_img(x, path, annotation=''):
     plt.savefig(path, dpi=300, pad_inches=0)    # visualize masked image
 
 
-def run(pretrained_backbone=None):
-    net = RACNN(num_classes=200).cuda()
+def run(pretrained_backbone='./build/mobilenet_v2_cub200.pt'):
+    net = RACNN(num_classes=2).cuda()
     if pretrained_backbone:  # Using pretrained backbone for apn pretraining
         state_dict = torch.load(pretrained_backbone).state_dict()
         net.b1.load_state_dict(state_dict)
@@ -51,13 +51,13 @@ def run(pretrained_backbone=None):
 
     trainset = CUB200_loader('./data/images')
     testset = CUB200_loader('./data/test')
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, collate_fn=trainset.CUB_collate, num_workers=4)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, collate_fn=testset.CUB_collate, num_workers=4)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, collate_fn=trainset.CUB_collate, num_workers=4)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=True, collate_fn=testset.CUB_collate, num_workers=4)
     sample = random_sample(testloader)
     net.mode("pretrain_apn")
 
     def avg(x): return sum(x)/len(x)
-    for epoch in range(1):
+    for epoch in range(10):
         losses = []
         for step, (inputs, _) in enumerate(trainloader, 0):
 
@@ -66,19 +66,18 @@ def run(pretrained_backbone=None):
             avg_loss = avg(losses[-5 if len(losses) > 5 else -len(losses):])
             print(f':: loss @step{step:2d}: {loss}\tavg_loss_5: {avg_loss}')
 
-            if step % 2 == 0 or step < 5:  # check point
+            if step % 2 == 0 :  # check point
                 _, _, _, resized = net(sample.unsqueeze(0))
                 x1, x2 = resized[0].data, resized[1].data
                 # visualize cropped inputs
-                save_img(x1, path=f'build/.cache/step_{step}@2x.jpg', annotation=f'loss = {avg_loss:.7f}, step = {step}')
-                save_img(x2, path=f'build/.cache/step_{step}@4x.jpg', annotation=f'loss = {avg_loss:.7f}, step = {step}')
+                save_img(x1, path=f'build/.cache/step_{step}@2x.png', annotation=f'loss = {avg_loss:.7f}, step = {step}')
+                save_img(x2, path=f'build/.cache/step_{step}@4x.png', annotation=f'loss = {avg_loss:.7f}, step = {step}')
 
-            if step >= 70:  # 128 steps is enough for pretraining
-                torch.save(net.state_dict(), f'build/racnn_pretrained-{int(time.time())}.pt')
-                return
+            if step >= 20:  # 128 steps is enough for pretraining
+                torch.save(net.state_dict(), f'build/racnn_pretrained.pt')
 
 
-def build_gif(pattern='@2x', gif_name='pretrain_apn_cub200', cache_path='build/.cache'):
+def build_gif(pattern='@2x', gif_name='pretrain_apn', cache_path='build/.cache'):
     # generate a gif, enjoy XD
     files = [x for x in os.listdir(cache_path) if pattern in x]
     files.sort(key=lambda x: int(x.split('@')[0].split('_')[-1]))
@@ -97,5 +96,5 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     clean()
     run()
-    build_gif(pattern='@2x', gif_name='pretrain_apn_cub200')
-    build_gif(pattern='@4x', gif_name='pretrain_apn_cub200')
+    build_gif(pattern='@2x', gif_name='pretrain_apn')
+    build_gif(pattern='@4x', gif_name='pretrain_apn')
