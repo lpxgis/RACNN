@@ -11,11 +11,11 @@ import torchvision
 import matplotlib.pyplot as plt
 
 sys.path.append('.')  # noqa: E402
-from src.recurrent_attention_network_paper.model import RACNN
-from src.recurrent_attention_network_paper.CUB_loader import CUB200_loader
+from model import RACNN
+from CUB_loader import CUB200_loader
 from torch.autograd import Variable
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 def log(msg):
@@ -25,26 +25,20 @@ def log(msg):
 def eval(net, dataloader):
     log(' :: Testing on test set ...')
     correct_top1 = 0
-    correct_top3 = 0
-    correct_top5 = 0
     for step, (inputs, labels) in enumerate(dataloader, 0):
         inputs, labels = Variable(inputs).cuda(), Variable(labels).cuda()
 
         with torch.no_grad():
             logits = net(inputs)
             correct_top1 += torch.eq(logits.topk(max((1, 1)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()
-            correct_top3 += torch.eq(logits.topk(max((1, 3)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()
-            correct_top5 += torch.eq(logits.topk(max((1, 5)), 1, True, True)[1], labels.view(-1, 1)).sum().float().item()
 
-        if step > 20:
+        if step > 19:
             log(f'\tAccuracy@top1 ({step}/{len(dataloader)}) = {correct_top1/((step+1)*int(inputs.shape[0])):.5%}')
-            log(f'\tAccuracy@top3 ({step}/{len(dataloader)}) = {correct_top3/((step+1)*int(inputs.shape[0])):.5%}')
-            log(f'\tAccuracy@top5 ({step}/{len(dataloader)}) = {correct_top5/((step+1)*int(inputs.shape[0])):.5%}')
             return
 
 
 def run():
-    state_dict = torchvision.models.mobilenet.mobilenet_v2(pretrained=True).state_dict()
+    state_dict = torchvision.models.mobilenet.mobilenet_v2(pretrained=True,progress=True).state_dict()
     state_dict.pop('classifier.1.weight')
     state_dict.pop('classifier.1.bias')
     net = torchvision.models.mobilenet.mobilenet_v2(num_classes=2).cuda()
@@ -56,12 +50,12 @@ def run():
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-    trainset = CUB200_loader('external/CUB_200_2011', split='train')
-    testset = CUB200_loader('external/CUB_200_2011', split='test')
+    trainset = CUB200_loader('data/images')
+    testset = CUB200_loader('data/test')
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, collate_fn=trainset.CUB_collate, num_workers=4)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=8, shuffle=False, collate_fn=testset.CUB_collate, num_workers=4)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, collate_fn=testset.CUB_collate, num_workers=4)
 
-    classes = [line.split(' ')[1] for line in open('external/CUB_200_2011/classes.txt', 'r').readlines()]
+
     log(' :: Start training ...')
 
     for epoch in range(100):  # loop over the dataset multiple times
