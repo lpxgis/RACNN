@@ -89,11 +89,11 @@ class CUB200_loader(data.Dataset):
 if __name__ == '__main__':
     trainset = CUB200_loader(os.getcwd() + '/data/images')
     trainloader = data.DataLoader(trainset, batch_size = 3,
-            shuffle = False, collate_fn = trainset.CUB_collate, num_workers = 1)
+            shuffle = True, collate_fn = trainset.CUB_collate, num_workers = 1)
     for img, cls in trainloader:
-        print(' [*] train images:', img.size())
-        print(' [*] train class:', cls.size())
-        break
+        # print(' [*] train images:', img.size())
+        # print(' [*] train class:', cls.size())
+        print(cls)
 
     testset = CUB200_loader(os.getcwd() + '/data/images')
     testloader = data.DataLoader(testset, batch_size = 3,

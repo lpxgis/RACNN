@@ -53,12 +53,12 @@ def run():
     trainset = CUB200_loader('data/images')
     testset = CUB200_loader('data/test')
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, collate_fn=trainset.CUB_collate, num_workers=4)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, collate_fn=testset.CUB_collate, num_workers=4)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=True, collate_fn=testset.CUB_collate, num_workers=4)
 
 
     log(' :: Start training ...')
 
-    for epoch in range(100):  # loop over the dataset multiple times
+    for epoch in range(10):  # loop over the dataset multiple times
         losses = 0
         for step, (inputs, labels) in enumerate(trainloader, 0):
             inputs, labels = Variable(inputs).cuda(), Variable(labels).cuda()
@@ -76,10 +76,9 @@ def run():
                 log(f':: loss @step({step:2d}/{len(trainloader)})-epoch{epoch}: {loss:.10f}\tavg_loss_20: {avg_loss:.10f}')
                 losses = 0
         eval(net, testloader)
-        if epoch % 20 == 0 and epoch != 0:
-            stamp = f'e{epoch}{int(time.time())}'
-            torch.save(net, f'build/mobilenet_v2_cub200-{stamp}.pt')
-            torch.save(optimizer.state_dict, f'build/optimizer-{stamp}.pt')
+        if epoch % 9 == 0 and epoch != 0:
+            torch.save(net, f'build/mobilenet_v2_cub200.pt')
+            torch.save(optimizer.state_dict, f'build/optimizer.pt')
 
 
 if __name__ == "__main__":
